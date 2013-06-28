@@ -1,0 +1,136 @@
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+    <style type="text/css"> @import "http://code.jquery.com/ui/1.9.2/themes/smoothness/jquery-ui.css";</style>
+    <!-- feuille de style pour le tableau -->
+    <style type="text/css" title="currentStyle">
+            /*
+            * DataTables framework
+            */
+        div.dataTables_wrapper {
+            background-color: #FFF;
+        }
+
+        div.dataTables_length {
+            float: left;
+        }
+
+        div.dataTables_filter {
+            float: right;
+        }
+
+        div.dataTables_info {
+            padding: 9px 6px 6px 6px;
+            float: left;
+        }
+
+        div.dataTables_paginate {
+            float: right;
+        }
+
+        div.dataTables_length,
+        div.dataTables_filter,
+        div.dataTables_paginate {
+            padding: 12px;
+        }
+
+    </style>
+    <script src="http://jquery-csv.googlecode.com/files/jquery.csv-0.71.js"></script>
+
+    <script>
+        // build HTML table data from an array (one or two dimensional)
+        function generateTable(data) {
+            var i=0;
+            var html = '';
+
+            if(typeof(data[0]) === 'undefined') {
+                return null;
+            }
+
+            if(data[0].constructor === Array) {
+                for(var row in data) {
+                    html += '<tr>\r\n';
+                    for(var item in data[row]) {
+                        html += '<td><pre>' + data[row][item] + '</pre></td>\r\n';
+                    }
+                    html += '</tr>\r\n';
+                }
+            }
+
+            return html;
+        }
+
+        // MAIN - Show a CSV file
+        $(document).ready(function() {
+			//cache disabling
+			var ie_fix = new Date().getTime();
+			$.ajaxSetup({cache: false});
+
+            var URL = "./Export.csv";
+            $.get(URL, function (inputstream) {
+				//Need to be in UTF encoding
+                data = $.csv.toArrays(inputstream,
+                        {delimiter:';', // sets a custom text delimiter character
+                        separator:';', // sets a custom field separator character
+                        //escaper:'\', // sets a custom escape character
+                        skip: 1} // skips lines
+                         );
+                var html = generateTable(data);
+                $('#myTable').empty();
+                $('#dataOfTable').html(html);
+                $('#MyTable').dataTable( {
+                    "bFilter": true,
+                    "bInfo": true,
+                    "bAutoWidth": true,
+                    "bJQueryUI": true,
+                    //"sPaginationType": "full_numbers",
+
+                    "aoColumns": [
+                        /* Code */   null,
+                        /* Statut */  { "bVisible":    false },
+                        /* Motif */ null,
+                        /* Designation */  null,
+                        /* Descritpion */    { "bVisible":    false },
+                        /* Date de MAJ */    null
+                    ],
+                    //"sScrollY": "100%",
+                    "bPaginate": true,
+                    "oLanguage": {
+                        "sSearch": "Rechercher",
+                        "sLengthMenu": "Affiche _MENU_ enregistrements par page",
+                        "sZeroRecords": "Aucune donnée à afficher",
+                        "sInfo": "_START_ sur _END_ de _TOTAL_ lignes",
+                        "sInfoEmpty": "0 ligne",
+                        "sInfoFiltered": "(filtre sur _MAX_ lignes total)"
+                    },
+                    //sur la colnne 'Statut' non visible
+                    "aaSorting": [[ 1, "desc" ]]
+
+
+                } );
+            })
+        });
+    </script>
+
+<table cellpadding="1" cellspacing="0" border="0" class="display" id="MyTable"  class="display" width="100%" >
+    <!--en-tête obligatoire pour le framework datatable-->
+    <thead>
+    <tr >
+        <td width="5%" align="center" valign="center" >
+            Code </td>
+        <td width="5%" align="center" valign="center"  >
+            Statut</td>
+        <td width="15%" align="center" valign="center"  >
+            Motif</td>
+        <td width="75%" align="center" valign="center"   >
+            D&eacute;signation</td>
+        <td width="75%" align="center" valign="center"   >
+            Description</td>
+        <td width="5%" align="center" valign="center"  >
+            Derni&egrave;re mise &agrave; jour</td>
+    </tr>
+    </thead>
+    <tbody id="dataOfTable">
+    </tbody>
+</table>
